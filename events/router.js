@@ -27,9 +27,7 @@ router.get('/user', jwtAuth, (req, res, next) => {
 }) 
 
 router.patch('/:id', jsonParser, jwtAuth, (req, res, next) => {//updating not posting
-  console.log('REQQQQ', req.user)
   const acceptUserId = req.user._id;
-  console.log(acceptUserId)
   const { id } = req.params;
 
   const updateEvent = {//Dont create a new event create a accpeted id initial set to null and when a person accept it set it to that id
@@ -40,7 +38,9 @@ router.patch('/:id', jsonParser, jwtAuth, (req, res, next) => {//updating not po
     acceptUserId: acceptUserId
   };
 
-    Event.findByIdAndUpdate(id, updateEvent)
+    Event.findByIdAndUpdate(id, updateEvent, {
+      new: true
+    })
     .then(event => {
       if (event) {
         res.json(event);
