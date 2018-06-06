@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const passport = require('passport');
 
-const {Event} = require('./models');
+const {UserEvent} = require('./models');//dont duplicate use event model instead
 
 const router = express.Router();
 
@@ -12,62 +12,13 @@ const jsonParser = bodyParser.json();
 const jwtAuth = passport.authenticate('jwt', {session: false});
 
 //Get events
-router.get('/', (req, res) => {
-  return Event.find()
+router.get('/', jwtAuth, (req, res) => {
+  return UserEvent.find({
+    userId: req.user._id
+  })
     .then(events => res.json(events.map(event => event.serialize())))
     .catch(err => res.status(500).json({message: 'Internal server error'}));
 });
-
-router.get('/user', jwtAuth, (req, res, next) => {
-
-  return Event.find( { $or: [ {"userId": req.user._id}, {"acceptUserId": req.user._id} ] } )
-  
-    .then(events => res.json(events.map(event => event.serialize())))
-    .catch(err => res.status(500).json({message: 'Internal server error'}));
-}) 
-
-router.patch('/:id', jsonParser, jwtAuth, (req, res, next) => {//updating not posting
-  console.log('REQQQQ', req.user)
-  const acceptUserId = req.user._id;
-  console.log(acceptUserId)
-  const { id } = req.params;
-
-  const updateEvent = {//Dont create a new event create a accpeted id initial set to null and when a person accept it set it to that id
-    title: req.body.title,
-    hours: req.body.hours,
-    pay: req.body.pay,
-    userId: req.body.userId,
-    acceptUserId: acceptUserId
-  };
-
-    Event.findByIdAndUpdate(id, updateEvent)
-    .then(event => {
-      if (event) {
-        res.json(event);
-      } else {
-        next();
-      }
-    })
-
-  .catch(err => res.status(500).json({message: 'Internal server error'}));
-}) 
-
-router.delete('/:id', jsonParser, jwtAuth, (req, res, next) => {
-
-  const { id } = req.params;
-
-    Event.findByIdAndRemove(id)
-    .then(result => {
-      if (result) {
-        res.status(204).end();
-      } else {
-        next();
-      }
-    })
-
-  .catch(err => res.status(500).json({message: 'Internal server error'}));
-}) 
-
 
 // Post a new Event
 router.post('/', jsonParser, jwtAuth, (req, res) => {
@@ -157,13 +108,12 @@ router.post('/', jsonParser, jwtAuth, (req, res) => {
   
     // let {title, hours, pay} = req.body;
 
-    const event = new Event({
+    const event = new UserEvent({
         _id: new mongoose.Types.ObjectId(),
         title: req.body.title,
         hours: req.body.hours,
         pay: req.body.pay,
-        userId: userId,
-        acceptUserId: null
+        userId: userId
       });
 
     // Username and password come in pre-trimmed, otherwise we throw an error

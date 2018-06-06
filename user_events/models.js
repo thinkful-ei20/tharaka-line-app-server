@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 mongoose.Promise = global.Promise;
 
-const EventSchema = mongoose.Schema({
+const UserEventSchema = mongoose.Schema({
   title: {
     type: String,
     required: true
@@ -20,23 +20,19 @@ const EventSchema = mongoose.Schema({
   userId: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User'
-  },
-  acceptUserId: {
-    type: mongoose.Schema.Types.ObjectId
-  }
+  }//need another field to see if a user picked a job posted by another user. Check box.
 });
 
-EventSchema.methods.serialize = function() {
+UserEventSchema.methods.serialize = function() {
   return {
     title: this.title || '',
     hours: this.hours || '',
     pay: this.pay || '',
     userId: this.userId || '',
-    acceptUserId: this.acceptUserId || '',
     _id: this._id || ''
   };
 };
 
-const Event = mongoose.model('Event', EventSchema);
+const UserEvent = mongoose.model('UserEvent', UserEventSchema);
 
-module.exports = {Event};
+module.exports = {UserEvent};
