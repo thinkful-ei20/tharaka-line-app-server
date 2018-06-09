@@ -26,11 +26,11 @@ router.get('/user', jwtAuth, (req, res, next) => {
     .catch(err => res.status(500).json({message: 'Internal server error'}));
 }) 
 
-router.patch('/:id', jsonParser, jwtAuth, (req, res, next) => {//updating not posting
+router.patch('/:id', jsonParser, jwtAuth, (req, res, next) => {
   const acceptUserId = req.user._id;
   const { id } = req.params;
 
-  const updateEvent = {//Dont create a new event create a accpeted id initial set to null and when a person accept it set it to that id
+  const updateEvent = {
     title: req.body.title,
     hours: req.body.hours,
     pay: req.body.pay,
@@ -71,7 +71,6 @@ router.delete('/:id', jsonParser, jwtAuth, (req, res, next) => {
 
 // Post a new Event
 router.post('/', jsonParser, jwtAuth, (req, res) => {
-    // console.log(req.user);
     const userId = req.user._id;
     const requiredFields = ['title', 'hours', 'pay'];
     const missingField = requiredFields.find(field => !(field in req.body));
